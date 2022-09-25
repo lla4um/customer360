@@ -12,7 +12,7 @@ Customer 360 applications because it provides the foundations for
 Customer 360 applications require the ability to access data lakes containing structured and unstructured data, integrate data sets, and run operational and analytical workloads simultaneously. MapR enables applications to glean customer intelligence through machine learning that relates to customer personality, sentiment, propensity to buy, and likelihood to churn.
 
 
-<img src="https://github.com/mapr-demos/customer360/blob/master/images/dataflow.gif" width="70%">
+<img src="https://github.com/lla4um/customer360/blob/master/images/dataflow.gif" width="70%">
 
 ## Overview
 
