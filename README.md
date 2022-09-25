@@ -1,6 +1,6 @@
 BY USING THIS SOFTWARE, YOU EXPRESSLY ACCEPT AND AGREE TO THE TERMS OF THE AGREEMENT CONTAINED IN THIS GITHUB REPOSITORY.  See the file EULA.md for details.
 
-#  Customer 360 Powered by HPE Ezmeral;
+#  Customer 360 Powered by HPE Ezmeral
 
 The <a href="https://www.hpe.com/us/en/software/ezmeral-data-fabric.html">HPE Ezmeral Data Fabric</a> is uniquely suited to run 
 Customer 360 applications because it provides the foundations for
