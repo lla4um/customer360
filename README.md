@@ -1,15 +1,15 @@
 BY USING THIS SOFTWARE, YOU EXPRESSLY ACCEPT AND AGREE TO THE TERMS OF THE AGREEMENT CONTAINED IN THIS GITHUB REPOSITORY.  See the file EULA.md for details.
 
-#  Customer 360 Powered by MapR&trade;
+#  Customer 360 Powered by HPE Ezmeral;
 
-The <a href="https://mapr.com/products/mapr-converged-data-platform/">MapR Converged Data Platform</a> is uniquely suited to run 
+The <a href="https://www.hpe.com/us/en/software/ezmeral-data-fabric.html">HPE Ezmeral Data Fabric</a> is uniquely suited to run 
 Customer 360 applications because it provides the foundations for
 
 1. Cloud Scale Storage
 2. Schemaless Data Integration
 3. Machine Learning
 
-Customer 360 applications require the ability to access data lakes containing structured and unstructured data, integrate data sets, and run operational and analytical workloads simultaneously. MapR enables applications to glean customer intelligence through machine learning that relates to customer personality, sentiment, propensity to buy, and likelihood to churn. Check out the <a href="https://mapr.com/solutions/quickstart/customer-360-knowing-your-customer-is-step-one/">Customer 360 Quick Start Solution</a> to learn more about MapR's products and solutions for Customer 360 applications.
+Customer 360 applications require the ability to access data lakes containing structured and unstructured data, integrate data sets, and run operational and analytical workloads simultaneously. MapR enables applications to glean customer intelligence through machine learning that relates to customer personality, sentiment, propensity to buy, and likelihood to churn.
 
 
 <img src="https://github.com/mapr-demos/customer360/blob/master/images/dataflow.gif" width="70%">
@@ -58,7 +58,7 @@ You're a customer support representative. You're about to answer a call from Eri
 
 # Get Community Support!
 
-Visit the [MapR Community](https://community.mapr.com/) pages where you can post questions and discuss your use case.
+Visit the [HPE Ezmeral Community](https://www.hpe.com/us/en/services.html) pages where you can post questions and discuss your use case.
 
 
 
