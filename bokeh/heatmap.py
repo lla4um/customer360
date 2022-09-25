@@ -3,13 +3,29 @@
 ##########################
 
 import pandas as pd
+from math import pi
+from bokeh.models import BasicTicker, ColorBar, LinearColorMapper, PrintfTickFormatter
+from bokeh.plotting import figure, show
 from sklearn.datasets import make_classification
 from bokeh.models import ColumnDataSource, FixedTicker
-from bokeh.charts import HeatMap
+#from bkcharts.charts import HeatMap
 from bokeh.models.widgets import  DataTable, TableColumn
 from bokeh.models import HoverTool
 
+
+
 def create_heatmap(df):
+
+    # test to redo heatmap
+    ###################################
+
+
+    # reshape to 1D array or rates with a month and year for each row.
+    TOOLS = "hover,save,pan,box_zoom,reset,wheel_zoom"
+
+    ########################################
+    # end test
+
 
     products=['Debit Card',
               'Personal Credit Card',
@@ -38,33 +54,56 @@ def create_heatmap(df):
     df2 = pd.DataFrame(X)
     # ensure all values are positive (this is needed for our customer 360 use-case)
     df2 = df2.abs()
+
     # rename X columns
     df2 = rename_columns(df2)
     # and add the Y
     df2['y'] = Y
-    #df
+    print(df2)
     # split df into cluster groups
     grouped = df2.groupby(['y'], sort=True)
-
     # compute sums for every column in every group
+
     sums = grouped.sum()
 
-    score = []
-    for x in sums.apply(tuple):
-        score.extend(x)
-
-    data=dict(
+    persona=list(sums.index) * len(sums.columns)
+    persona2=['0','1','2','3']
+    score = [0] * len(persona)
+    product=[item for item in list(sums.columns) for i in range(len(sums.index))]
+    p = figure(title="Customer Profiles",
+           x_range=persona2, y_range=products,
+           x_axis_location="above", width=900, height=400,
+           tools=TOOLS, toolbar_location='below')
+    import string
+    import random
+    for x in range(len(score)):
+        score[x] = ord(random.choice(string.ascii_letters))
+    data2=dict(
         persona=list(sums.index) * len(sums.columns),
         product=[item for item in list(sums.columns) for i in range(len(sums.index))],
         score=score
     )
 
-    hm = HeatMap(data, x='product', y='persona', values='score', title='Customer Profiles', xlabel='Product', ylabel='Persona', legend=False, stat=None,  tools=["save"], height=400, width=900, toolbar_location=None)
-    hm.yaxis.ticker=FixedTicker(ticks=[0,1,2,3])
-    hm_source = ColumnDataSource(data=sums)
+    p.grid.grid_line_color = None
+    p.axis.axis_line_color = None
+    p.axis.major_tick_line_color = None
+    p.axis.major_label_text_font_size = "10px"
+    p.axis.major_label_standoff = 0
+    p.xaxis.major_label_orientation = pi / 3
+    df4 = pd.DataFrame(data2)
 
-    hm_data_table = DataTable(
-        source=hm_source,
-        columns=[TableColumn(field=c, title=c) for c in sums.columns], width=900, height=150)
+    colors = ["#75968f", "#a5bab7", "#c9d9d3", "#e2e2e2", "#dfccce", "#ddb7b1", "#cc7878", "#933b41", "#550b1d"]
+    mapper = LinearColorMapper(palette=colors, low=df4.score.min(), high=df4.score.max())
 
-    return hm
+    hm = p.rect(x="product", y="persona", width=10, height=10,
+       source=data2,
+       fill_color={'field': 'score', 'transform': mapper},
+       line_color=None)
+
+    #color_bar = ColorBar(color_mapper=mapper, major_label_text_font_size="16px",
+    #                 ticker=BasicTicker(desired_num_ticks=len(colors)),
+    #                 formatter=PrintfTickFormatter(format="%d%%"),
+    #                 label_standoff=6, border_line_color=None)
+    #p.add_layout(color_bar, 'right')
+
+    return p

@@ -6,10 +6,11 @@ import pandas as pd
 import logging
 from os import listdir
 from os.path import join, isfile
-from bokeh.layouts import widgetbox, layout
+from bokeh.layouts import widgetbox, layout, row
 from bokeh.models import ColumnDataSource, Div, Select, RadioButtonGroup
 from bokeh.models.widgets import DataTable, TableColumn, StringFormatter, TextInput, Button
 import pyodbc
+#0import bkcharts
 from bokeh.models import HoverTool
 from datetime import datetime
 import sys
@@ -64,7 +65,7 @@ sys.setrecursionlimit(10000)
 logger = logging.getLogger('bokeh')
 logger.setLevel(logging.DEBUG)
 
-conn = pyodbc.connect("DSN=drill64", autocommit=True)
+conn = pyodbc.connect("DSN=drill64", uid="ezmeral", pwd="admin123", autocommit=True)
 # Unicode options for Anaconda python
 conn.setencoding("utf-8")
 conn.setdecoding(pyodbc.SQL_CHAR, encoding='utf-32le')
@@ -79,6 +80,7 @@ sql = "SELECT _id, name, address, email, phone_number, latitude, longitude, firs
       "FROM `dfs.default`.`./apps/crm` limit 10000"
 logger.debug("executing SQL: " + sql)
 customer_directory_df = pd.read_sql(sql, conn)
+print(customer_directory_df)
 logger.debug("records returned: " + str(len(customer_directory_df.index)))
 query_performance.text = "<div class=\"small\">" + str(len(customer_directory_df.index)) + " rows selected</div>"
 
@@ -88,7 +90,6 @@ filterby = Select(title="Search Field:",
                 width=100,
                 value="name",
                 options=filter_options)
-
 sort_options = ['name', 'phone_number', 'email', 'first_visit']
 sortby = Select(title="Order By:",
                 width=100,
@@ -98,9 +99,9 @@ controls = [text_input, filterby, sortby]
 for control in controls:
      control.on_change('value', lambda attr, old, new: customer_directory_filter())
 
-
 def customer_directory_filter():
     # sorting by date requires converting the character string in first_visit
+    logger.debug("executing customer_directory_filter")
     if (sortby.value == 'first_visit'):
         sql = "SELECT _id, name, email, phone_number, first_visit, TO_DATE(`first_visit`, 'MM/dd/yyyy') AS first_visit_date_type, churn_risk, sentiment FROM `dfs.default`.`./apps/crm` where " + str(filterby.value) +" like '%" + str(text_input.value.strip()) + "%' order by first_visit_date_type limit 10000"
     else:
@@ -110,10 +111,9 @@ def customer_directory_filter():
     customer_directory_df = pd.read_sql(sql, conn).dropna()
     logger.debug("records returned: " + str(len(customer_directory_df.index)))
     query_performance.text = "<div class=\"small\">" + str(len(customer_directory_df.index)) + " rows selected</div>"
-
     # Add headshot to each row of customer_directory_df
     # Load face image files for each customer
-    headshots_path = "/home/mapr/customer360/bokeh/static/face_images/"
+    headshots_path = "/home/ezmeral/customer360/bokeh/static/face_images/"
     headshots = [f for f in listdir(headshots_path) if isfile(join(headshots_path, f))]
     # We have a dataset of face images, but we may not have enough face images for every customer
     # So we'll just use the same images for some customers.
@@ -134,9 +134,10 @@ def customer_directory_filter():
         'email': customer_directory_df.email
     }
 
+logger.debug("<-------------- Add headshots ----------->")
 # Add headshot to each row of customer_directory_df
 # Load face image files for each customer
-headshots_path = "/home/mapr/customer360/bokeh/static/face_images/"
+headshots_path = "/home/ezmeral/customer360/bokeh/static/face_images/"
 headshots = [f for f in listdir(headshots_path) if isfile(join(headshots_path, f))]
 # We have a dataset of face images, but we may not have enough face images for every customer
 # So we'll just use the same images for some customers.
@@ -157,17 +158,19 @@ customer_directory_df.loc[customer_directory_df['name'] == 'Robert Macfarlane', 
 customer_directory_df.loc[customer_directory_df['name'] == 'Danny Rearick', 'headshot'] = "36b.jpg"
 customer_directory_df.loc[customer_directory_df['name'] == 'Nicole Lewis', 'headshot'] = "26b.jpg"
 
-
 # Add tenure to each row of customer_directory_df
 customer_directory_df['tenure'] = customer_directory_df['first_visit'].apply(
     lambda x: (datetime.today() - datetime.strptime(x, '%m/%d/%Y')).days)
 
-customer_directory_source = ColumnDataSource(data=dict())
 
+logger.debug("<---- customer_directory_source   --->")
+customer_directory_source = ColumnDataSource(data=dict())
+logger.debug("<---- after customer_directory_source   --->")
 pageviews_reset = True
 
 
 def selection_update(new):
+    logger.debug("<------------ Selection_update ------------->")
     # Processes selections in the customer name directory table
     logger.debug(new)
     logger.debug(new.keys)
@@ -238,6 +241,7 @@ def selection_update(new):
 
 
 def make_default_selection():
+    logger.debug("<------- make_default_selection ------------>")
     # Processes selections in the customer name directory table
     current = customer_directory_df[customer_directory_df['name'] == ('Eva Peterson')]
     image_file = "bokeh/static/face_images/" + str(current.iloc[0].headshot)
@@ -253,6 +257,7 @@ def make_default_selection():
                            100 + np.random.randint(low=0, high=899))]
     }
 
+logger.debug("<---- Lets make some colums ---->")
 columns = [
     TableColumn(field="name", title="Name", width=120),
     TableColumn(field="phone_number", title="Phone", width=100),
@@ -260,34 +265,37 @@ columns = [
     TableColumn(field="email", title="Email", width=150)
     # TableColumn(field="salary", title="Income", formatter=NumberFormatter(format="0.000%")),
 ]
-
-customer_directory_table = DataTable(source=customer_directory_source, columns=columns, row_headers=False,
+logger.debug("<---- Customer dictionary table ---->")
+customer_directory_table = DataTable(source=customer_directory_source, columns=columns, header_row=False,
                                      editable=True, width=280, height=300, fit_columns=False)
 
+logger.debug("<---- customer on change ---->")
 customer_directory_source.on_change('selected', lambda attr, old, new: selection_update(new))
+logger.debug("<---- customer dictionary source ---->")
 customer_directory_source.data = {
     'name': customer_directory_df.name,
     'phone_number': customer_directory_df.phone_number,
     'tenure': ((customer_directory_df.tenure / 365).astype(int)).astype(str) + 'yr',
     'email': customer_directory_df.email
 }
-
+logger.debug("<---- churn data  ---->")
 churn_table_columns = [
     TableColumn(field="Characteristic", title="Characteristic"),
     TableColumn(field="Prediction", title="Prediction")
     # TableColumn(field="Prediction", title="Probability", formatter=NumberFormatter(format="0.000%"))
 ]
-
+logger.debug("<---- new machine learning table ---->")
 machine_learning_table = ColumnDataSource(data=dict())
-
-ML_table = DataTable(source=machine_learning_table, columns=churn_table_columns, row_headers=False, editable=True,
+logger.debug("<---- filling the ml table ---->")
+ML_table = DataTable(source=machine_learning_table, columns=churn_table_columns, header_row=False, editable=True,
                      width=280, height=160)
 
 ##############################################################################
 # Create heatmap
 ##########################
-
-from heatmap import create_heatmap
+logger.debug("<---- Create some ehatmaps ---->")
+print(customer_directory_df)
+from heatmap2 import create_heatmap
 
 hm = create_heatmap(customer_directory_df)
 
@@ -303,7 +311,7 @@ from math import pi
 from bokeh.models.glyphs import Line
 
 # TODO: put this in maprdb and query it with Drill
-DATA_FILE = "/home/mapr/customer360/bokeh/datasets/credit_card_transactions.csv"
+DATA_FILE = "/home/ezmeral/customer360/bokeh/datasets/credit_card_transactions.csv"
 txndf = pd.read_csv(DATA_FILE, thousands=',')
 txndf['Date'] = pd.to_datetime(txndf['Date'], format='%m/%d/%Y')
 
@@ -438,6 +446,8 @@ headline_row = [headliner]
 row1 = [title]
 row2 = [column1, column2, column3]
 row3 = [hm]
+print(hm)
+#l1 = layout(children[row1, row2, row3], sizing_mode='fixed')
 l1 = layout([row1, row2, row3], sizing_mode='fixed')
 l2 = layout([headline_row], sizing_mode='fixed')
 curdoc().add_root(l1)
